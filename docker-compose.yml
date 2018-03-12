@@ -72,9 +72,9 @@ services:
       - PORTUS_DB_PASSWORD=${MYSQL_ROOT_PASSWORD}
       - PORTUS_DB_POOL=5
       # Secrets
-      - PORTUS_SECRET_KEY_BASE=${SECRET_KEY_BASE}
+      - PORTUS_SECRET_KEY_BASE
       - PORTUS_KEY_PATH=/run/secrets/privkey.pem
-      - PORTUS_PASSWORD=${PORTUS_PASSWORD}
+      - PORTUS_PASSWORD
       # SSL
       - PORTUS_PUMA_TLS_KEY=/run/secrets/privkey.pem
       - PORTUS_PUMA_TLS_CERT=/run/secrets/cert.pem
