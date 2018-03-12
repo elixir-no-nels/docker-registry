@@ -1,1 +1,28 @@
+version: '3.3'
 
+services:
+  database:
+    image: mariadb
+    deploy:
+      placement:
+        constraints:
+          - node.label.database == true
+    environment:
+      - MYSQL_ROOT_PASSWORD
+      - MYSQL_DATABASE
+      - MYSQL_USER
+      - MYSQL_PASSWORD
+    volumes:
+      - db:/var/lib/mysql
+
+  adminer:
+    image: adminer
+    deploy:
+      placement:
+        constraints:
+          - node.label.database == true
+    depends_on:
+      - database
+    
+volumes:
+  db:
