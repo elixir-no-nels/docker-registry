@@ -11,8 +11,6 @@ services:
     environment:
       - MYSQL_ROOT_PASSWORD
       - MYSQL_DATABASE
-      - MYSQL_USER
-      - MYSQL_PASSWORD
     volumes:
       - db:/var/lib/mysql
 
@@ -37,15 +35,15 @@ services:
       - 80:80
     environment:
       # SSL
-      REGISTRY_HTTP_TLS_CERTIFICATE: /run/secrets/cert.pem
-      REGISTRY_HTTP_TLS_KEY: /run/secrets/privkey.pem
+      - REGISTRY_HTTP_TLS_CERTIFICATE: /run/secrets/cert.pem
+      - REGISTRY_HTTP_TLS_KEY: /run/secrets/privkey.pem
       # Authentication
-      REGISTRY_AUTH_TOKEN_REALM: https://${MACHINE_FQDN}/v2/token
-      REGISTRY_AUTH_TOKEN_SERVICE: ${MACHINE_FQDN}
-      REGISTRY_AUTH_TOKEN_ISSUER: ${MACHINE_FQDN}
-      REGISTRY_AUTH_TOKEN_ROOTCERTBUNDLE: /run/secrets/cert.pem
+      - REGISTRY_AUTH_TOKEN_REALM: https://${MACHINE_FQDN}/v2/token
+      - REGISTRY_AUTH_TOKEN_SERVICE: ${MACHINE_FQDN}
+      - REGISTRY_AUTH_TOKEN_ISSUER: ${MACHINE_FQDN}
+      - REGISTRY_AUTH_TOKEN_ROOTCERTBUNDLE: /run/secrets/cert.pem
       # Portus endpoint
-      REGISTRY_NOTIFICATIONS_ENDPOINTS: >
+      - REGISTRY_NOTIFICATIONS_ENDPOINTS: >
         - name: portus
           url: https://${MACHINE_FQDN}/v2/webhooks/events
           timeout: 2000ms
@@ -56,6 +54,38 @@ services:
       - privkey.pem
     volumes:
       - /registry:/var/lib/registry
+
+  portus:
+    restart: always
+    image: opensuse/portus:head
+    deploy:
+      placement:
+        constraints:
+          - node.label.portus == true
+    ports:
+      - 443:3000
+    environment:
+      # DB
+      - PORTUS_MACHINE_FQDN_VALUE=${MACHINE_FQDN}
+      - PORTUS_DB_HOST=database
+      - PORTUS_DB_DATABASE=${MYSQL_DATABASE}
+      - PORTUS_DB_PASSWORD=${MYSQL_ROOT_PASSWORD}
+      - PORTUS_DB_POOL=5
+      # Secrets
+      - PORTUS_SECRET_KEY_BASE=${SECRET_KEY_BASE}
+      - PORTUS_KEY_PATH=/run/secrets/privkey.pem
+      - PORTUS_PASSWORD=${PORTUS_PASSWORD}
+      # SSL
+      - PORTUS_PUMA_TLS_KEY=/run/secrets/privkey.pem
+      - PORTUS_PUMA_TLS_CERT=/run/secrets/cert.pem
+      # Other
+      - RAILS_SERVE_STATIC_FILES='true'
+    secrets:
+      - cert.pem
+      - privkey.pem
+    depends_on:
+      - database
+      - registry
     
 volumes:
   db:
