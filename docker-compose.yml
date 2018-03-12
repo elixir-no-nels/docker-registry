@@ -35,13 +35,13 @@ services:
       - 80:80
     environment:
       # SSL
-      REGISTRY_HTTP_TLS_CERTIFICATE: /run/secrets/cert.pem
-      REGISTRY_HTTP_TLS_KEY: /run/secrets/privkey.pem
+      REGISTRY_HTTP_TLS_CERTIFICATE: /run/secrets/cert.crt
+      REGISTRY_HTTP_TLS_KEY: /run/secrets/privkey.key
       # Authentication
       REGISTRY_AUTH_TOKEN_REALM: https://${MACHINE_FQDN}/v2/token
       REGISTRY_AUTH_TOKEN_SERVICE: ${MACHINE_FQDN}
       REGISTRY_AUTH_TOKEN_ISSUER: ${MACHINE_FQDN}
-      REGISTRY_AUTH_TOKEN_ROOTCERTBUNDLE: /run/secrets/cert.pem
+      REGISTRY_AUTH_TOKEN_ROOTCERTBUNDLE: /run/secrets/cert.crt
       # Portus endpoint
       REGISTRY_NOTIFICATIONS_ENDPOINTS: >
         - name: portus
@@ -50,8 +50,8 @@ services:
           threshold: 5
           backoff: 1s
     secrets:
-      - cert.pem
-      - privkey.pem
+      - cert.crt
+      - privkey.key
     volumes:
       - /registry:/var/lib/registry
 
@@ -73,16 +73,16 @@ services:
       - PORTUS_DB_POOL=5
       # Secrets
       - PORTUS_SECRET_KEY_BASE
-      - PORTUS_KEY_PATH=/run/secrets/privkey.pem
+      - PORTUS_KEY_PATH=/run/secrets/privkey.key
       - PORTUS_PASSWORD
       # SSL
-      - PORTUS_PUMA_TLS_KEY=/run/secrets/privkey.pem
-      - PORTUS_PUMA_TLS_CERT=/run/secrets/cert.pem
+      - PORTUS_PUMA_TLS_KEY=/run/secrets/privkey.key
+      - PORTUS_PUMA_TLS_CERT=/run/secrets/cert.crt
       # Other
       - RAILS_SERVE_STATIC_FILES='true'
     secrets:
-      - cert.pem
-      - privkey.pem
+      - cert.crt
+      - privkey.key
     depends_on:
       - database
       - registry
@@ -91,7 +91,7 @@ volumes:
   db:
   
 secrets:
-    cert.pem:
+    cert.crt:
         external: true
-    privkey.pem:
+    privkey.key:
         external: true
