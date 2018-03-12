@@ -57,7 +57,7 @@ services:
 
   portus:
     restart: always
-    image: opensuse/portus:head
+    image: opensuse/portus:2.3
     deploy:
       placement:
         constraints:
