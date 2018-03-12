@@ -7,7 +7,7 @@ services:
     deploy:
       placement:
         constraints:
-          - node.label.database == true
+          - node.labels.database == true
     environment:
       - MYSQL_ROOT_PASSWORD
       - MYSQL_DATABASE
@@ -20,7 +20,7 @@ services:
     deploy:
       placement:
         constraints:
-          - node.label.database == true
+          - node.labels.database == true
     depends_on:
       - database
       
@@ -30,7 +30,7 @@ services:
     deploy:
       placement:
         constraints:
-          - node.label.registry == true
+          - node.labels.registry == true
     ports:
       - 80:80
     environment:
@@ -61,7 +61,7 @@ services:
     deploy:
       placement:
         constraints:
-          - node.label.portus == true
+          - node.labels.portus == true
     ports:
       - 443:3000
     environment:
