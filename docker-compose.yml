@@ -2,6 +2,7 @@ version: '3.3'
 
 services:
   database:
+    restart: always
     image: mariadb
     deploy:
       placement:
@@ -16,6 +17,7 @@ services:
       - db:/var/lib/mysql
 
   adminer:
+    restart: always
     image: adminer
     deploy:
       placement:
@@ -23,6 +25,43 @@ services:
           - node.label.database == true
     depends_on:
       - database
+      
+  registry:
+    restart: always
+    image: registry:2
+    deploy:
+      placement:
+        constraints:
+          - node.label.registry == true
+    ports:
+      - 80:80
+    environment:
+      # SSL
+      REGISTRY_HTTP_TLS_CERTIFICATE: /run/secrets/cert.pem
+      REGISTRY_HTTP_TLS_KEY: /run/secrets/privkey.pem
+      # Authentication
+      REGISTRY_AUTH_TOKEN_REALM: https://${MACHINE_FQDN}/v2/token
+      REGISTRY_AUTH_TOKEN_SERVICE: ${MACHINE_FQDN}
+      REGISTRY_AUTH_TOKEN_ISSUER: ${MACHINE_FQDN}
+      REGISTRY_AUTH_TOKEN_ROOTCERTBUNDLE: /run/secrets/cert.pem
+      # Portus endpoint
+      REGISTRY_NOTIFICATIONS_ENDPOINTS: >
+        - name: portus
+          url: https://${MACHINE_FQDN}/v2/webhooks/events
+          timeout: 2000ms
+          threshold: 5
+          backoff: 1s
+    secrets:
+      - cert.pem
+      - privkey.pem
+    volumes:
+      - /registry:/var/lib/registry
     
 volumes:
   db:
+  
+secrets:
+    cert.pem:
+        external: true
+    privkey.pem:
+        external: true
