@@ -32,7 +32,7 @@ services:
         constraints:
           - node.labels.registry == true
     ports:
-      - 80:5000
+      - 5000:5000
     environment:
       # SSL
       REGISTRY_HTTP_TLS_CERTIFICATE: /run/secrets/cert.crt
@@ -63,10 +63,9 @@ services:
         constraints:
           - node.labels.portus == true
     ports:
-      - 443:3000
+      - 3000:3000
     environment:
       - PORTUS_MACHINE_FQDN_VALUE=${MACHINE_FQDN}
-      - RAILS_SERVE_STATIC_FILES='true'
       # DB
       - PORTUS_DB_HOST=database
       - PORTUS_DB_DATABASE=${MYSQL_DATABASE}
@@ -82,6 +81,8 @@ services:
     secrets:
       - cert.crt
       - privkey.key
+    volumes:
+      - static:/srv/Portus/public
     depends_on:
       - database
       - registry
@@ -106,13 +107,36 @@ services:
       - PORTUS_SECRET_KEY_BASE
       - PORTUS_KEY_PATH=/run/secrets/privkey.key
       - PORTUS_PASSWORD
+    secrets:
+      - cert.crt
+      - privkey.key
     depends_on:
       - database
       - registry
       - portus
-    
+
+  nginx:
+    restart: always
+    image: nels/docker-nginx
+    deploy:
+      placement:
+        constraints:
+          - node.labels.portus == true
+    ports:
+      - 80:80
+      - 443:443
+    volumes:
+      - static:/srv/Portus/public:ro
+    secrets:
+      - cert.crt
+      - privkey.key
+    depends_on:
+      - registry
+      - portus
+
 volumes:
   db:
+  static:
   
 secrets:
     cert.crt:
