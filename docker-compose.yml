@@ -65,8 +65,9 @@ services:
     ports:
       - 443:3000
     environment:
-      # DB
       - PORTUS_MACHINE_FQDN_VALUE=${MACHINE_FQDN}
+      - RAILS_SERVE_STATIC_FILES='true'
+      # DB
       - PORTUS_DB_HOST=database
       - PORTUS_DB_DATABASE=${MYSQL_DATABASE}
       - PORTUS_DB_PASSWORD=${MYSQL_ROOT_PASSWORD}
@@ -78,14 +79,38 @@ services:
       # SSL
       - PORTUS_PUMA_TLS_KEY=/run/secrets/privkey.key
       - PORTUS_PUMA_TLS_CERT=/run/secrets/cert.crt
-      # Other
-      - RAILS_SERVE_STATIC_FILES='true'
     secrets:
       - cert.crt
       - privkey.key
     depends_on:
       - database
       - registry
+      
+  background:
+    restart: always
+    image: opensuse/portus:2.3
+    deploy:
+      placement:
+        constraints:
+          - node.labels.portus == true
+    environment:
+      - PORTUS_MACHINE_FQDN_VALUE=${MACHINE_FQDN}
+      - CCONFIG_PREFIX=PORTUS
+      - PORTUS_BACKGROUND=true
+      # DB
+      - PORTUS_MACHINE_FQDN_VALUE=${MACHINE_FQDN}
+      - PORTUS_DB_HOST=database
+      - PORTUS_DB_DATABASE=${MYSQL_DATABASE}
+      - PORTUS_DB_PASSWORD=${MYSQL_ROOT_PASSWORD}
+      - PORTUS_DB_POOL=5
+      # Secrets
+      - PORTUS_SECRET_KEY_BASE
+      - PORTUS_KEY_PATH=/run/secrets/privkey.key
+      - PORTUS_PASSWORD
+    depends_on:
+      - database
+      - registry
+      - portus
     
 volumes:
   db:
