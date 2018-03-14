@@ -3,7 +3,7 @@ version: '3.3'
 services:
   database:
     restart: always
-    image: mariadb
+    image: mariadb:10.0.23
     deploy:
       placement:
         constraints:
@@ -27,7 +27,7 @@ services:
       
   registry:
     restart: always
-    image: registry:2
+    image: registry:2.6
     deploy:
       placement:
         constraints:
