@@ -67,6 +67,7 @@ services:
       - 3000:3000
     environment:
       - PORTUS_MACHINE_FQDN_VALUE=${MACHINE_FQDN}
+      - PORTUS_DELETE_ENABLED=true
       # DB
       - PORTUS_DB_HOST=database
       - PORTUS_DB_DATABASE=${MYSQL_DATABASE}
