@@ -27,7 +27,7 @@ services:
       
   registry:
     restart: always
-    image: registry:2.6
+    image: registry
     deploy:
       placement:
         constraints:
